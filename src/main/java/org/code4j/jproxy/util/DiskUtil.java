@@ -18,6 +18,7 @@ import java.io.IOException;
 public class DiskUtil {
 
     public static void saveToDisk(String host,String uri,byte[] contents){
+        System.out.println(uri+" 图片存入本地");
         if (uri.equals(File.separator)){
             uri = File.separator+"index";
         }

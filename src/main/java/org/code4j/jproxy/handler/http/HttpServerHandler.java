@@ -5,8 +5,8 @@ package org.code4j.jproxy.handler.http;/**
  */
 
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.code4j.jproxy.client.ProxyClient;
 import org.code4j.jproxy.util.DiskUtil;
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * 上午9:18
  */
 
-public class HttpServerHandler extends ChannelHandlerAdapter {
+public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     private InetSocketAddress address;
     private String host;
@@ -34,52 +34,38 @@ public class HttpServerHandler extends ChannelHandlerAdapter {
         host = "http://"+address.getHostName()+":"+address.getPort();
     }
 
-//    @Override
-//    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        super.channelActive(ctx);
-//        System.out.println("创建了一个链接");
-////        String res = "<h1>Welcome to Code4J's Home!!</h1>";
-////        response(ctx, res);
-//    }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
         //在这里强转类型，如果使用了聚合器，就会被阻塞
-        DefaultHttpRequest request = (DefaultHttpRequest) msg;
         URL url = new URL(host+request.uri());
         System.out.println("url : "+url.toString()+"  uri : "+request.uri());
         ProxyClient client = new ProxyClient(url.toString());
-        System.out.println("打开链接");
-        Pattern pattern = Pattern.compile(".*\\."+WebUtil.IMAGE);
+        Pattern pattern = Pattern.compile(".*\\."+ WebUtil.IMAGE);
         Pattern css_pattern = Pattern.compile(".*\\.("+ WebUtil.CSS_FILE+")");
-        System.out.println("正则分析结束"+pattern.matcher(request.uri()).matches());
         byte[] bytes = null;
         if (pattern.matcher(request.uri()).matches()){
             System.out.println("读取到图片");
             bytes = client.fetchImage(HttpMethod.GET);
-            if (!ImageUtil.isImage(bytes)){
-                ctx.close();
-                return;
-            }
             response(ctx, bytes, WebUtil.IMAGE_PNG);
         }else {
             System.out.println("读取到文本");
-            if (css_pattern.matcher(request.uri()).matches()){
-                System.out.println("包含css 文件");
-                String css = client.fetchText(HttpMethod.GET);
-                bytes = css.getBytes();
-                fetchImageResource(WebUtil.fetchImageFromString(host, css), request.uri(), ctx);
-                response(ctx, bytes, WebUtil.TEXT_CSS);
-            }else{
-                bytes = client.fetchText(HttpMethod.GET).getBytes();
-                response(ctx, bytes, WebUtil.TEXT_HTML);
-            }
-//            bytes = client.fetchText().getBytes();
-//            response(ctx, bytes, WebUtil.TEXT_HTML);
+//            if (css_pattern.matcher(request.uri()).matches()){
+//                System.out.println("包含css 文件");
+//                String css = client.fetchText(HttpMethod.GET);
+//                bytes = css.getBytes();
+//                fetchImageResource(WebUtil.fetchImageFromString(host, css), request.uri(), ctx);
+//                response(ctx, bytes, WebUtil.TEXT_CSS);
+//            }else{
+//                bytes = client.fetchText(HttpMethod.GET).getBytes();
+//                response(ctx, bytes, WebUtil.TEXT_HTML);
+//            }
+            String context = client.fetchText(HttpMethod.GET);
+//            fetchCssResource(context,request.uri(),client,ctx);
+            bytes = context.getBytes();
+            response(ctx, bytes, WebUtil.TEXT_HTML);
         }
         DiskUtil.saveToDisk(address.getHostName() ,request.uri(), bytes);
-        ctx.close();
-
     }
 
     @Override
@@ -99,6 +85,7 @@ public class HttpServerHandler extends ChannelHandlerAdapter {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH,
                 response.content().readableBytes() + "");
         ctx.channel().writeAndFlush(response);
+        ctx.close();
     }
     private void fetchImageResource(List<String> urls,String uri,ChannelHandlerContext ctx){
         for (String url:urls){
@@ -111,6 +98,21 @@ public class HttpServerHandler extends ChannelHandlerAdapter {
             }
             System.out.println("读取到CSS中的图片");
             DiskUtil.saveToDisk(address.getHostName(),uri, bytes);
+        }
+    }
+
+    private void fetchCssResource(String context,String uri,ProxyClient client,ChannelHandlerContext ctx){
+        Pattern css_pattern = Pattern.compile(".*\\.(" + WebUtil.CSS_FILE + ")");
+        if (css_pattern.matcher(context).matches()){
+            System.out.println("包含css 文件");
+            String css = client.fetchText(HttpMethod.GET);
+            byte[] bytes = css.getBytes();
+            fetchImageResource(WebUtil.fetchImageFromString(host, css), uri, ctx);
+            try {
+                response(ctx, bytes, WebUtil.TEXT_CSS);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
     }
     //62 line

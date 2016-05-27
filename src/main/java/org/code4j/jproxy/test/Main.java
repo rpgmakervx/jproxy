@@ -21,7 +21,7 @@ public class Main {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new ProxyServer("www.baidu.com",80).startup(9524);
+                new ProxyServer("www.bqtalk.com",80).startup(9524);
             }
         }).start();
     }

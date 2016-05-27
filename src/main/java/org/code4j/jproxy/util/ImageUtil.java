@@ -5,6 +5,8 @@ package org.code4j.jproxy.util;/**
  */
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,7 +22,9 @@ public class ImageUtil {
     public static boolean isImage(byte[] content){
         try {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(content));
-            if (image == null) {
+            ImageIcon icon = new ImageIcon(content);
+            Image imageIcon = icon.getImage();
+            if (image == null || imageIcon == null) {
                 return false;
             }
             System.out.println("high: " + image.getHeight());

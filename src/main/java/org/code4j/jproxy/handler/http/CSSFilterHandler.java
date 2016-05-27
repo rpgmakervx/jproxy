@@ -5,8 +5,8 @@ package org.code4j.jproxy.handler.http;/**
  */
 
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.code4j.jproxy.client.ProxyClient;
 import org.code4j.jproxy.util.DiskUtil;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * 下午5:01
  */
 
-public class CSSFilterHandler extends ChannelHandlerAdapter{
+public class CSSFilterHandler extends SimpleChannelInboundHandler{
 
     private InetSocketAddress address;
     public CSSFilterHandler(InetSocketAddress address){
@@ -32,7 +32,7 @@ public class CSSFilterHandler extends ChannelHandlerAdapter{
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         Pattern css_pattern = Pattern.compile(".*\\.("+ WebUtil.CSS_FILE+")");
         System.out.println("css filter: "+msg.getClass().getName());
         if (msg instanceof DefaultHttpRequest){
@@ -48,7 +48,6 @@ public class CSSFilterHandler extends ChannelHandlerAdapter{
                 DiskUtil.saveToDisk(address.getHostName(), request.uri(), bytes);
             }
         }
-
     }
 
     @Override
