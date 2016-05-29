@@ -4,32 +4,32 @@
     {
       "host":"www.oschina.net",
       "port":80,
-      "weight":2
+      "weight":1
     },
     {
       "host":"www.zhuangbi.me",
       "port":80,
-      "weight":2
+      "weight":1
     },
     {
-      "host":"localhost",
+      "host":"www.csdn.net",
       "port":8080,
-      "weight":2
+      "weight":1
     },
     {
       "host":"www.baidu.com",
       "port":80,
-      "weight":2
+      "weight":1
     },
     {
       "host":"www.sohu.com",
       "port":80,
-      "weight":2
+      "weight":1
     },
     {
       "host":"www.taobao.com",
       "port":80,
-      "weight":2
+      "weight":1
     }
   ]
 }

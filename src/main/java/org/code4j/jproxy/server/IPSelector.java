@@ -17,7 +17,7 @@ import java.util.*;
  * 下午7:13
  */
 
-public class LoadBalance {
+public class IPSelector {
 
     static List<String> hostsname = new ArrayList<String>();
     static List<Integer> ports = new ArrayList<Integer>();

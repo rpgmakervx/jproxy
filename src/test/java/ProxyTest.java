@@ -5,7 +5,7 @@
  */
 
 import org.code4j.jproxy.client.ProxyClient;
-import org.code4j.jproxy.server.LoadBalance;
+import org.code4j.jproxy.server.IPSelector;
 import org.junit.Test;
 
 import java.io.*;
@@ -78,7 +78,7 @@ public class ProxyTest {
 
     @Test
     public void testLoadBalance(){
-        InetSocketAddress address = LoadBalance.filter();
+        InetSocketAddress address = IPSelector.filter();
         System.out.println(address.getHostName()+":"+address.getPort());
     }
 }

@@ -9,7 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.code4j.jproxy.client.ProxyClient;
-import org.code4j.jproxy.server.LoadBalance;
+import org.code4j.jproxy.server.IPSelector;
 import org.code4j.jproxy.util.DiskUtil;
 import org.code4j.jproxy.util.WebUtil;
 
@@ -32,14 +32,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
      * 每次请求都重新获取一次地址
      */
     public void fetchInetAddress(){
-        this.address = LoadBalance.filter();
+        this.address = IPSelector.filter();
         System.out.println("新获取的地址-->  "+address.getHostName()+":"+address.getPort());
     }
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
         fetchInetAddress();
         //在这里强转类型，如果使用了聚合器，就会被阻塞
-        ProxyClient client = new ProxyClient(LoadBalance.filter(),WebUtil.ROOT.equals(request.uri())?"":request.uri());
+        ProxyClient client = new ProxyClient(IPSelector.filter(),WebUtil.ROOT.equals(request.uri())?"":request.uri());
         Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
         byte[] bytes;
         //读取图片
