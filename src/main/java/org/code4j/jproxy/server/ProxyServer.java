@@ -12,8 +12,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.code4j.jproxy.handler.ServerChildHandler;
 
-import java.net.InetSocketAddress;
-
 /**
  * Description : server
  * Created by YangZH on 16-5-25
@@ -22,14 +20,6 @@ import java.net.InetSocketAddress;
 
 public class ProxyServer {
 
-    public String remoteHost;
-
-    public int remotePort;
-
-    public ProxyServer(String hostname, int port) {
-        this.remoteHost = hostname;
-        this.remotePort = port;
-    }
 
     public void startup(int port){
         System.out.println("正在启动服务。。。");
@@ -39,7 +29,7 @@ public class ProxyServer {
         ChannelFuture f = null;
         try {
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .childHandler(new ServerChildHandler(new InetSocketAddress(remoteHost, remotePort)))
+                    .childHandler(new ServerChildHandler())
                     .option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
             f = b.bind(port).sync();
             System.out.println("服务已启动");

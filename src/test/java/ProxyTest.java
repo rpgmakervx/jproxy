@@ -4,15 +4,13 @@
  *  下午2:16
  */
 
-import io.netty.handler.codec.http.HttpMethod;
 import org.code4j.jproxy.client.ProxyClient;
-import org.code4j.jproxy.util.ImageUtil;
+import org.code4j.jproxy.server.LoadBalance;
 import org.junit.Test;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -25,23 +23,28 @@ public class ProxyTest {
 
     @Test
     public void testParrtern(){
-        Pattern pattern = Pattern.compile(".*\\.(png|ico|jpg|jpeg|bmp|swf|swf)");
-        System.out.println(pattern.matcher("http://125.100.158/favor.png").matches());
+        Pattern pattern = Pattern.compile("url\\(.*\\.(png|ico|jpg|jpeg|bmp|swf|swf)\\)");
+//        Pattern pattern = Pattern.compile("(url\\()(http://).*?(?:jpg|png|gif)(?=\\))");
+        Matcher matcher = pattern.matcher("background: #fff url(bg-upper.png) repeat-x top left;");
+        System.out.println(matcher.matches());
+        while (matcher.find()){
+            System.out.println(matcher.group());
+        }
     }
 
     @Test
     public void testImageAccess() throws Exception {
-        ProxyClient client = new ProxyClient("http://127.0.0.1:8080/tomcat.png");
-        File file = new File(System.getProperty("user.dir")+File.separator+"cache"+ File.separator+"tomcat.png");
+        ProxyClient client = new ProxyClient(new InetSocketAddress("127.0.0.1",8080),"/tomcat.css");
+        File file = new File(System.getProperty("user.dir")+File.separator+"cache"+ File.separator+"tomcat.css");
         if (!file.exists()){
             System.out.println(file.getAbsolutePath());
             file.createNewFile();
         }
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-        bos.write(client.fetchImage(HttpMethod.GET));
+//        bos.write(client.fetchImage(HttpMethod.GET));
 //
         bos.flush();
-        System.out.println("is image? "+ ImageUtil.isImage(client.fetchImage(HttpMethod.GET)));
+//        System.out.println("is image? "+ ImageUtil.isImage(client.fetchImage(HttpMethod.GET)));
     }
 
     @Test
@@ -52,7 +55,30 @@ public class ProxyTest {
 
     @Test
     public void testSaveFile() throws IOException {
-        File file = new File("/home/code4j/newfile");
-        file.createNewFile();
+//        Pattern css_pattern = Pattern.compile(".+\\.(css).*");
+//        System.out.println(css_pattern.matcher("<link href=\"tomcat.css\" rel=\"stylesheet\" type=\"text/css\" />").matches());
+        Pattern pattern = Pattern.compile("url\\(.*\\.(png|ico|jpg|jpeg|bmp|swf|swf)\\)");
+//        pattern.matcher("")
+    }
+
+    @Test
+    public void testConfig() throws IOException {
+        InputStream is = this.getClass().getResourceAsStream("/config.json");
+        System.out.println(is);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuffer sb = new StringBuffer();
+        String str = "";
+        while ((str = br.readLine()) != null){
+            sb.append(str);
+        }
+        System.out.println(sb);
+        int weight = (int) Math.rint(Float.valueOf("2.1"));
+        System.out.println();
+    }
+
+    @Test
+    public void testLoadBalance(){
+        InetSocketAddress address = LoadBalance.filter();
+        System.out.println(address.getHostName()+":"+address.getPort());
     }
 }

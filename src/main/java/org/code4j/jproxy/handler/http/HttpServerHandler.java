@@ -9,13 +9,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.code4j.jproxy.client.ProxyClient;
+import org.code4j.jproxy.server.LoadBalance;
 import org.code4j.jproxy.util.DiskUtil;
-import org.code4j.jproxy.util.ImageUtil;
 import org.code4j.jproxy.util.WebUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -28,44 +27,36 @@ import java.util.regex.Pattern;
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     private InetSocketAddress address;
-    private String host;
-    public HttpServerHandler(InetSocketAddress address){
-        this.address = address;
-        host = "http://"+address.getHostName()+":"+address.getPort();
+
+    /**
+     * 每次请求都重新获取一次地址
+     */
+    public void fetchInetAddress(){
+        this.address = LoadBalance.filter();
+        System.out.println("新获取的地址-->  "+address.getHostName()+":"+address.getPort());
     }
-
-
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
+        fetchInetAddress();
         //在这里强转类型，如果使用了聚合器，就会被阻塞
-        URL url = new URL(host+request.uri());
-        System.out.println("url : "+url.toString()+"  uri : "+request.uri());
-        ProxyClient client = new ProxyClient(url.toString());
-        Pattern pattern = Pattern.compile(".*\\."+ WebUtil.IMAGE);
-        Pattern css_pattern = Pattern.compile(".*\\.("+ WebUtil.CSS_FILE+")");
-        byte[] bytes = null;
+        ProxyClient client = new ProxyClient(LoadBalance.filter(),WebUtil.ROOT.equals(request.uri())?"":request.uri());
+        Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
+        byte[] bytes;
+        //读取图片
         if (pattern.matcher(request.uri()).matches()){
-            System.out.println("读取到图片");
-            bytes = client.fetchImage(HttpMethod.GET);
+            System.out.println("读取到图片 " + request.uri());
+            bytes = client.fetchImage(request.method(),request.headers());
             response(ctx, bytes, WebUtil.IMAGE_PNG);
         }else {
-            System.out.println("读取到文本");
-//            if (css_pattern.matcher(request.uri()).matches()){
-//                System.out.println("包含css 文件");
-//                String css = client.fetchText(HttpMethod.GET);
-//                bytes = css.getBytes();
-//                fetchImageResource(WebUtil.fetchImageFromString(host, css), request.uri(), ctx);
-//                response(ctx, bytes, WebUtil.TEXT_CSS);
-//            }else{
-//                bytes = client.fetchText(HttpMethod.GET).getBytes();
-//                response(ctx, bytes, WebUtil.TEXT_HTML);
-//            }
-            String context = client.fetchText(HttpMethod.GET);
-//            fetchCssResource(context,request.uri(),client,ctx);
+            //读取文本
+            System.out.println("读取到文本 " + request.uri());
+            String context = client.fetchText(request.method(),request.headers());
+            //同时检查文本如果是CSS，再读取CSS中的图片
+            fetchResource(context, request, ctx);
             bytes = context.getBytes();
             response(ctx, bytes, WebUtil.TEXT_HTML);
         }
-        DiskUtil.saveToDisk(address.getHostName() ,request.uri(), bytes);
+        DiskUtil.saveToDisk(address.getHostName(), request.uri(), bytes);
     }
 
     @Override
@@ -75,7 +66,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+        ctx.close();
     }
 
     private void response(ChannelHandlerContext ctx,byte[] contents,String contentType) throws UnsupportedEncodingException {
@@ -87,27 +79,40 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         ctx.channel().writeAndFlush(response);
         ctx.close();
     }
-    private void fetchImageResource(List<String> urls,String uri,ChannelHandlerContext ctx){
-        for (String url:urls){
-            System.out.println("新的图片路径： "+url);
-            ProxyClient client = new ProxyClient(url);
-            byte[] bytes = client.fetchImage(HttpMethod.GET);
-            if (!ImageUtil.isImage(bytes)){
-                ctx.close();
-                return;
+    private void fetchImageResource(List<String> uris,HttpHeaders headers){
+        for (String uri:uris){
+            ProxyClient client;
+            if (uri.contains(WebUtil.HTTP)||uri.contains(WebUtil.HTTPS)){
+                uri = uri.replace(WebUtil.HTTP,"").replace(WebUtil.HTTPS,"");
+                System.out.println("uri --> "+uri);
+                String host = uri.split("/")[0];
+                uri = uri.replace(host,"");
+                System.out.println("host --> "+host);
+                client = new ProxyClient(new InetSocketAddress(host,80),uri);
+            }else{
+                client = new ProxyClient(address,uri);
             }
-            System.out.println("读取到CSS中的图片");
+            byte[] bytes = client.fetchImage(HttpMethod.GET,headers);
+//            if (!ImageUtil.isImage(bytes)){
+//                ctx.close();
+//                return;
+//            }
             DiskUtil.saveToDisk(address.getHostName(),uri, bytes);
         }
     }
 
-    private void fetchCssResource(String context,String uri,ProxyClient client,ChannelHandlerContext ctx){
-        Pattern css_pattern = Pattern.compile(".*\\.(" + WebUtil.CSS_FILE + ")");
-        if (css_pattern.matcher(context).matches()){
-            System.out.println("包含css 文件");
-            String css = client.fetchText(HttpMethod.GET);
-            byte[] bytes = css.getBytes();
-            fetchImageResource(WebUtil.fetchImageFromString(host, css), uri, ctx);
+    /**
+     * 将CSS中的图片读取出来
+     * @param context   CSS文件内容
+     * @param request   请求对象
+     * @param ctx       上下文
+     */
+    private void fetchResource(String context,HttpRequest request,ChannelHandlerContext ctx){
+        Pattern css_pattern = Pattern.compile(".+\\.(" + WebUtil.CSS_FILE + ").*");
+        if (css_pattern.matcher(request.uri()).matches()){
+            System.out.println("包含css 文件 "+request.uri());
+            byte[] bytes = context.getBytes();
+            fetchImageResource(WebUtil.fetchImageFromString(context),request.headers());
             try {
                 response(ctx, bytes, WebUtil.TEXT_CSS);
             } catch (UnsupportedEncodingException e) {
@@ -115,6 +120,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
             }
         }
     }
+
+//    private void fetchResource(String context,HttpRequest request,ChannelHandlerContext ctx){
+//        Pattern css_pattern = Pattern.compile(".+\\.(" + WebUtil.CSS_FILE + ").*");
+//        System.out.println("包含css 文件 "+request.uri()+"  "+css_pattern.matcher(context).matches());
+//        if (css_pattern.matcher(context).matches()){
+//            byte[] bytes = context.getBytes();
+//            fetchImageResource(WebUtil.fetchImageFromString(context),request.headers());
+//            try {
+//                response(ctx, bytes, WebUtil.TEXT_CSS);
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
     //62 line
 //        System.out.println("tomcat 的响应："+response);
 //        if (msg instanceof HttpContent){

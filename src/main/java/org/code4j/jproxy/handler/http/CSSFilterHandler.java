@@ -27,23 +27,24 @@ import java.util.regex.Pattern;
 public class CSSFilterHandler extends SimpleChannelInboundHandler{
 
     private InetSocketAddress address;
+    private String host;
     public CSSFilterHandler(InetSocketAddress address){
         this.address = address;
+        host = "http://"+address.getHostName()+":"+address.getPort();
     }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Pattern css_pattern = Pattern.compile(".*\\.("+ WebUtil.CSS_FILE+")");
-        System.out.println("css filter: "+msg.getClass().getName());
+        Pattern css_pattern = Pattern.compile(".+\\.("+ WebUtil.CSS_FILE+").*");
         if (msg instanceof DefaultHttpRequest){
             DefaultHttpRequest request = (DefaultHttpRequest) msg;
             if (css_pattern.matcher(request.uri()).matches()){
-                System.out.println("包含css 文件");
-                URL url = new URL("http://"+address.getHostName()+":"+address.getPort()+request.uri());
-                ProxyClient client = new ProxyClient(url.toString());
-                String css = client.fetchText(HttpMethod.GET);
-                fetchAllResource(WebUtil.fetchImageFromString(url.toString(),css),request.uri(),ctx);
-                byte[] bytes = client.fetchText(HttpMethod.GET).getBytes();
+                System.out.println("包含css 文件 "+request.uri());
+                URL url = new URL(host+request.uri());
+                ProxyClient client = new ProxyClient(address,request.uri());
+                String css = client.fetchText(request.method(),request.headers());
+                fetchAllResource(WebUtil.fetchImageFromString(css),request.headers(),ctx);
+                byte[] bytes = css.getBytes();
                 response(ctx, bytes);
                 DiskUtil.saveToDisk(address.getHostName(), request.uri(), bytes);
             }
@@ -70,10 +71,10 @@ public class CSSFilterHandler extends SimpleChannelInboundHandler{
         ctx.channel().writeAndFlush(response);
     }
 
-    public void fetchAllResource(List<String> urls,String uri,ChannelHandlerContext ctx){
-        for (String url:urls){
-            ProxyClient client = new ProxyClient(url);
-            byte[] bytes = client.fetchImage(HttpMethod.GET);
+    public void fetchAllResource(List<String> uris,HttpHeaders headers,ChannelHandlerContext ctx){
+        for (String uri:uris){
+            ProxyClient client = new ProxyClient(address,uri);
+            byte[] bytes = client.fetchImage(HttpMethod.GET,headers);
             try {
                 response(ctx, bytes);
             } catch (UnsupportedEncodingException e) {

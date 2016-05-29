@@ -23,7 +23,7 @@ public class WebUtil {
     public static final String INDEX = "index";
     public static final String CSS_FILE = "css";
     public static final String JS_FILE = "js";
-    public static final String IMAGE = "(png|ico|jpg|jpeg|bmp|swf|swf)";
+    public static final String IMAGE = "(png|ico|gif|jpg|jpeg|bmp|swf|swf)";
 
     public static final String TEXT_PLAIN = "text/plain";
     public static final String TEXT_CSS = "text/css";
@@ -31,13 +31,21 @@ public class WebUtil {
     public static final String IMAGE_PNG = "image/png";
     public static final String INNER_IMAGE = "url\\(.*\\.(png|ico|jpg|jpeg|bmp|swf|swf)\\)";
 
-    public static List<String> fetchImageFromString(String currentPath,String content){
+    public static final String HTTP = "http://";
+    public static final String HTTPS = "https://";
+
+    public static final String ROOT = "/";
+
+    public static List<String> fetchImageFromString(String content){
+        System.out.println("在CSS中寻找图片资源");
         Pattern pattern = Pattern.compile(INNER_IMAGE);
         Matcher matcher = pattern.matcher(content);
         List<String> uris = new CopyOnWriteArrayList<String>();
-        while (matcher.find()){
+        while(matcher.find()){
             System.out.println("找到一个图片");
-            uris.add(currentPath+File.separator+matcher.group().replace("url(","").replace(")",""));
+            String path = matcher.group().replace("url(","").replace(")", "");
+            System.out.println("path ---> : "+path);
+            uris.add(File.separator+path);
         }
         return uris;
     }

@@ -1,0 +1,35 @@
+{
+  "listen":9524,
+  "proxy_pass":[
+    {
+      "host":"www.oschina.net",
+      "port":80,
+      "weight":2
+    },
+    {
+      "host":"www.zhuangbi.me",
+      "port":80,
+      "weight":2
+    },
+    {
+      "host":"localhost",
+      "port":8080,
+      "weight":2
+    },
+    {
+      "host":"www.baidu.com",
+      "port":80,
+      "weight":2
+    },
+    {
+      "host":"www.sohu.com",
+      "port":80,
+      "weight":2
+    },
+    {
+      "host":"www.taobao.com",
+      "port":80,
+      "weight":2
+    }
+  ]
+}

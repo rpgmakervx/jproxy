@@ -25,6 +25,7 @@ public class ImageUtil {
             ImageIcon icon = new ImageIcon(content);
             Image imageIcon = icon.getImage();
             if (image == null || imageIcon == null) {
+                System.out.println("假图片！！");
                 return false;
             }
             System.out.println("high: " + image.getHeight());

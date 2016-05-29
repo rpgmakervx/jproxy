@@ -5,6 +5,7 @@ package org.code4j.jproxy.client;/**
  */
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 
 /**
@@ -29,10 +31,23 @@ public class ProxyClient {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpPost httpPost;
     HttpGet httpGet;
+    String host;
+    String HOST;
     CloseableHttpResponse response = null;
-    public ProxyClient(String url) {
-        httpPost = new HttpPost(url);
-        httpGet = new HttpGet(url);
+    public ProxyClient(InetSocketAddress address,String uri){
+        this.host = HOST = address.getHostName();
+        boolean isLocal = host.equals("localhost");
+        if (isLocal){
+            httpPost = new HttpPost("http://"+host+":"+address.getPort()+uri);
+            httpGet = new HttpGet("http://"+host+":"+address.getPort()+uri);
+            HOST = host+":"+address.getPort();
+        }else if (!host.contains("http://")){
+            httpPost = new HttpPost("http://"+host+uri);
+            httpGet = new HttpGet("http://"+host+uri);
+        }else{
+            httpPost = new HttpPost(host+uri);
+            httpGet = new HttpGet(host+uri);
+        }
     }
 
     public void setUrl(String url){
@@ -65,18 +80,63 @@ public class ProxyClient {
 //        }
 //    }
 
-    public String fetchText(HttpMethod method){
+    public String fetchText(HttpMethod method,HttpHeaders headers){
         String body = "";
-        CloseableHttpResponse response = null;
         if (HttpMethod.POST.equals(method)){
-            httpPost.setHeader(HttpHeaderNames.CONTENT_TYPE.toString(), "text/html");
+            for (CharSequence name:headers.names()){
+                if ("Host".equalsIgnoreCase(name.toString())){
+                    httpPost.setHeader(name.toString(),HOST);
+                }else if (!"Referer".equals(name.toString())){
+                    httpPost.setHeader(name.toString(), headers.get(name).toString());
+                }
+            }
             try {
                 response = httpclient.execute(httpPost);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else{
-            httpGet.setHeader(HttpHeaderNames.CONTENT_TYPE.toString(), "text/html");
+            for (CharSequence name:headers.names()){
+                if ("Host".equalsIgnoreCase(name.toString())){
+                    httpGet.setHeader(name.toString(),HOST);
+                }else if (!"Referer".equals(name.toString())){
+                    httpGet.setHeader(name.toString(), headers.get(name).toString());
+                }
+                System.out.println(httpGet.getFirstHeader(name.toString()));
+            }
+            try {
+                response = httpclient.execute(httpGet);
+                System.out.println(httpGet.getURI()+" response code : "+response.getStatusLine().getStatusCode());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            //按指定编码转换结果实体为String类型
+            try {
+                body = EntityUtils.toString(entity, "UTF-8");
+                EntityUtils.consume(entity);
+                //释放链接
+                response.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return body;
+    }
+    public String fetchText(HttpMethod method){
+        String body = "";
+        CloseableHttpResponse response = null;
+        if (HttpMethod.POST.equals(method)){
+            try {
+                response = httpclient.execute(httpPost);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            httpGet.setHeader("authentication","passby");
+            httpGet.setHeader(HttpHeaderNames.CONTENT_TYPE.toString(),"text/html");
             try {
                 response = httpclient.execute(httpGet);
             } catch (IOException e) {
@@ -97,19 +157,30 @@ public class ProxyClient {
         }
         return body;
     }
-
-    public byte[] fetchImage(HttpMethod method){
+    public byte[] fetchImage(HttpMethod method,HttpHeaders headers){
         byte[] body = {};
         CloseableHttpResponse response = null;
         if (HttpMethod.POST.equals(method)){
-            httpPost.setHeader(HttpHeaderNames.CONTENT_TYPE.toString(), "text/html");
+            for (CharSequence name:headers.names()){
+                if ("Host".equalsIgnoreCase(name.toString())){
+                    httpPost.setHeader(name.toString(),HOST);
+                }else if (!"Referer".equals(name.toString())){
+                    httpPost.setHeader(name.toString(), headers.get(name).toString());
+                }
+            }
             try {
                 response = httpclient.execute(httpPost);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else{
-            httpGet.setHeader(HttpHeaderNames.CONTENT_TYPE.toString(), "text/html");
+            for (CharSequence name:headers.names()){
+                if ("Host".equalsIgnoreCase(name.toString())){
+                    httpGet.setHeader(name.toString(),HOST);
+                }else if (!"Referer".equals(name.toString())){
+                    httpGet.setHeader(name.toString(), headers.get(name).toString());
+                }
+            }
             try {
                 response = httpclient.execute(httpGet);
             } catch (IOException e) {
@@ -155,6 +226,6 @@ public class ProxyClient {
 //    }
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-
+        System.out.println(new ProxyClient(new InetSocketAddress("oschina.net",80),"/").fetchText(HttpMethod.GET));
     }
 }

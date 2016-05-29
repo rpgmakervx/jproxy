@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+<meta name="renderer" content="webkit" />
+<title>逼乎 - 与世界分享你的装逼技巧和水平</title>
+<meta property="qc:admins" content="156363371216721655" />
+<meta name="keywords" content="逼乎,逼乎网,逼乎官网,bihu,bihuwang,装逼,zhuangbi,是在下输了" />
+<meta name="description" content="一个真实的网络装逼社区，帮助你学习装逼，分享装逼。"  />
+<base href="http://zhuangbi.me/" /><!--[if IE]></base><![endif]-->
+
+
+
+<script type="text/javascript">
+	var _3A01595414CABD2BD67E753F6D6C316A="";
+	var G_POST_HASH=_3A01595414CABD2BD67E753F6D6C316A;
+	var G_INDEX_SCRIPT = "";
+	var G_SITE_NAME = "逼乎";
+	var G_BASE_URL = "http://zhuangbi.me";
+	var G_STATIC_URL = "http://zhuangbi.me/static";
+	var G_UPLOAD_URL = "http://zhuangbi.me/uploads";
+	var G_USER_ID = "";
+	var G_USER_NAME = "";
+	var G_UPLOAD_ENABLE = "N";
+	var G_UNREAD_NOTIFICATION = 0;
+	var G_NOTIFICATION_INTERVAL = 100000;
+	var G_CAN_CREATE_TOPIC = "";
+	var G_ADVANCED_EDITOR_ENABLE = "Y";
+
+	</script>
+<script src="http://zhuangbi.me/static/js/jquery.2.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/jquery.form.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/plug_module/plug-in_module.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/aws.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/aw_template.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/app.js?v=20150706" type="text/javascript"></script>
+<script src="http://zhuangbi.me/static/js/md5.js?v=20150706" type="text/javascript"></script>
+<link href="http://zhuangbi.me/static/js/particles.js" rel="stylesheet" type="text/css" />
+<link href="http://zhuangbi.me/static/js/application.js" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://zhuangbi.me/static/js/compatibility.js"></script>
+<script type="text/javascript" src="http://zhuangbi.me/static/js/top.js"></script>
+<script type="text/javascript">
+NProgress.start();
+NProgress.done();
+</script>
+<!--[if lte IE 8]>
+	<script type="text/javascript" src="http://zhuangbi.me/static/js/respond.js"></script>
+<![endif]-->
+</head>
+<noscript unselectable="on" id="noscript">
+    <div class="aw-404 aw-404-wrap container">
+        <img src="http://zhuangbi.me/static/common/no-js.jpg">
+        <p>你的浏览器禁用了JavaScript, 请开启后刷新浏览器获得更好的体验!</p>
+    </div>
+</noscript><style>
+*{
+padding:0;
+margin:0;
+}
+ol, ul {
+    list-style: none;
+}
+#login_form{
+position: fixed;
+top:0;
+left:0;
+}
+.form-control{
+left: 124px;
+    position: fixed;
+    width: 251px;
+    height: 41px;
+    background-color: rgba(0, 0, 0, 0)!important;
+    border: none;
+outline: none;
+}
+#aw-login-user-name{
+    top: 26px;
+}
+#aw-login-user-password{
+    top: 92px;
+}
+.checkbox{
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    top: 159px;
+    left: 106px;
+}
+</style>
+<img src="http://ww4.sinaimg.cn/large/a15b4afegw1ewswg19radj20ci0fbt9u" border="0" usemap="#planetmap"/>
+<!--装逼王癫疯之作-->
+<map name="planetmap" id="planetmap">
+<form id="login_form" method="post" onsubmit="return false" action="http://zhuangbi.me/account/ajax/login_process/">
+					<input type="hidden" name="return_url" value="" />
+					<ul>
+						<li>
+							<input type="text" id="aw-login-user-name" class="form-control" name="user_name" />
+						</li>
+						<li>
+							<input type="password" id="aw-login-user-password" class="form-control" name="password" />
+						</li>
+						<li class="alert alert-danger hide error_message">
+							<i class="icon icon-delete"></i> <em></em>
+						</li>
+						<li class="last">
+						<area shape="rect" coords="65,185,380,235" onclick="AWS.ajax_post($('#login_form'), AWS.ajax_processer, 'error_message');" href ="javascript:;" id="login_submit" alt="登录" />
+							<label>
+								<input type="checkbox" value="1" name="net_auto_login" class="checkbox"/>
+							</label>
+							<area shape="rect" coords="270,155,325,173" href="http://zhuangbi.me/account/find_password/" alt="找回密码" />
+						</li>
+					</ul>
+</form>
+<area shape="rect" coords="82,300,199,405" href="http://zhuangbi.me/account/openid/weibo/bind/" alt="微博登录" />
+<area shape="rect" coords="257,300,374,405" href="http://zhuangbi.me/account/openid/qq/bind/" alt="QQ 登录" />
+<area shape="rect" coords="85,448,378,524" href="http://zhuangbi.me/reader/" alt="逼乎阅读" />
+</map>
+
+<script type="text/javascript" src="http://zhuangbi.me/static/js/app/login.js"></script>

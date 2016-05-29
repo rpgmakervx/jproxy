@@ -18,10 +18,11 @@ public class Main {
 //        System.out.println(Arrays.toString(MD5Util.getMD5("x")));
 //        System.out.println(MD5Util.getMD5("x").length*8);
 //        System.out.println(Arrays.toString(new String(MD5Util.getMD5("x")).getBytes()));
+        //开源中国要有WWW
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new ProxyServer("www.bqtalk.com",80).startup(9524);
+                new ProxyServer().startup(9524);
             }
         }).start();
     }
