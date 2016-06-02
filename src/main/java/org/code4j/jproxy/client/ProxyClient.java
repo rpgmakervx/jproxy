@@ -5,7 +5,6 @@ package org.code4j.jproxy.client;/**
  */
 
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
@@ -19,6 +18,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.code4j.jproxy.util.DiskUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -94,20 +94,41 @@ public class ProxyClient {
 //        }
 //    }
 
-    public CloseableHttpResponse fetchText(HttpMethod method,HttpHeaders headers){
-        String body = "";
-        setHeader(httpGet,headers);
+    public CloseableHttpResponse fetchText(){
         CloseableHttpResponse response = null;
         try {
-            response = httpclient.execute(httpHost,httpGet);
+            response = httpclient.execute(httpGet);
             System.out.println(httpGet.getURI()+" response code : "+response.getStatusLine().getStatusCode());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return response;
     }
-    public CloseableHttpResponse fetchImage(HttpMethod method,HttpHeaders headers){
-        byte[] body = {};
+
+    public CloseableHttpResponse fetchImage(){
+        CloseableHttpResponse response = null;
+        httpGet.setHeader("Content-Type","image/png");
+        try {
+            response = httpclient.execute(httpGet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    public CloseableHttpResponse fetchText(HttpHeaders headers){
+        String body = "";
+        setHeader(httpGet,headers);
+        CloseableHttpResponse response = null;
+        try {
+            response = httpclient.execute(httpGet);
+            System.out.println(httpGet.getURI()+" response code : "+response.getStatusLine().getStatusCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+    public CloseableHttpResponse fetchImage(HttpHeaders headers){
         CloseableHttpResponse response = null;
         setHeader(httpGet,headers);
         try {
@@ -115,7 +136,6 @@ public class ProxyClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return response;
     }
 
@@ -127,15 +147,19 @@ public class ProxyClient {
         return nameValuePairs;
     }
     private void setHeader(HttpRequestBase httpRequest,HttpHeaders headers){
+        System.out.println("REQUEST header ---------------");
         for (CharSequence name:headers.names()){
+            boolean exclusive = name.toString().equalsIgnoreCase("Content-Length")
+                    ||name.toString().equalsIgnoreCase("Referer");
             if ("Host".equalsIgnoreCase(name.toString())){
                 httpRequest.setHeader(name.toString(), HOST);
                 System.out.println(name.toString() + ":" + HOST);
-            } else if (!name.toString().equals("Content-Length")){
+            } else if (!exclusive){
                 httpRequest.setHeader(name.toString(), headers.get(name).toString());
                 System.out.println(name.toString()+":"+headers.get(name).toString());
             }
         }
+        System.out.println("END header ---------------");
     }
 
     public CloseableHttpResponse postJsonRequest(String json,HttpHeaders headers){
@@ -199,32 +223,11 @@ public class ProxyClient {
         }
         return body;
     }
-//    public void sendRequest(){
-//        System.out.println("客户端发送消息");
-//        URI uri = null;
-//        try {
-//            uri = new URI("http://127.0.0.1:9524");
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-//        String msg = "Are you ok?";
-//        DefaultFullHttpRequest request = null;
-//        try {
-//            request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
-//                    uri.toASCIIString(), Unpooled.wrappedBuffer(msg.getBytes("UTF-8")));
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//        // 构建http请求
-//        request.headers().set(HttpHeaderNames.HOST, uri.getHost());
-//        request.headers().set(HttpHeaderNames.CONTENT_TYPE,"text/html");
-//        request.headers().set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes()+"");
-//        this.future.channel().writeAndFlush(request);
-//    }
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-//        System.out.println(new ProxyClient(new InetSocketAddress("localhost",8080),"/dobehub/user/login").fetchText(HttpMethod.GET));
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet("localhost:8080");
+        ProxyClient client = new ProxyClient(new InetSocketAddress("localhost",8080),"/asf-logo.png");
+        DiskUtil.saveToDisk("localhost:8080","/asf-logo.png",client.getResponseBytes(client.fetchImage()));
+//        CloseableHttpClient httpclient = HttpClients.createDefault();
+//        HttpGet httpGet = new HttpGet("localhost:8080");
     }
 }

@@ -8,14 +8,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.code4j.jproxy.client.ProxyClient;
-import org.code4j.jproxy.util.DiskUtil;
 import org.code4j.jproxy.util.WebUtil;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -25,13 +20,6 @@ import java.util.regex.Pattern;
  */
 
 public class TextHandler extends SimpleChannelInboundHandler{
-
-    private InetSocketAddress address;
-    private String host;
-    public TextHandler(InetSocketAddress address){
-        this.address = address;
-        host = "http://"+address.getHostName()+":"+address.getPort();
-    }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
