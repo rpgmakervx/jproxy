@@ -40,9 +40,12 @@ public class JSONUtil {
         }
     }
 
-    public static Map<String,String> requestParam(String str){
+    public static Map<String,Object> requestParam(String str){
+        System.out.println("原生请求字符串-----------： \n");
+        System.out.println(str);
+        System.out.println("原生请求字符串-----------： \n");
         String[] param = str.split("&");
-        Map<String,String> params = new HashMap<String, String>();
+        Map<String,Object> params = new HashMap<String, Object>();
         for (String p:param){
             String[] pa = p.split("=");
             params.put(pa[0],pa[1]);

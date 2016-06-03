@@ -13,7 +13,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -117,7 +121,6 @@ public class ProxyClient {
     }
 
     public CloseableHttpResponse fetchText(HttpHeaders headers){
-        String body = "";
         setHeader(httpGet,headers);
         CloseableHttpResponse response = null;
         try {
@@ -139,24 +142,40 @@ public class ProxyClient {
         return response;
     }
 
-    private List<NameValuePair> setRequestData(Map<String,String> params){
+    private List<NameValuePair> setRequestData(Map<String,Object> params){
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-        for (Map.Entry<String,String> entry:params.entrySet()){
-            nameValuePairs.add(new BasicNameValuePair(entry.getKey(),entry.getValue()));
+        for (Map.Entry<String,Object> entry:params.entrySet()){
+            nameValuePairs.add(new BasicNameValuePair(entry.getKey(), (String) entry.getValue()));
         }
         return nameValuePairs;
+    }
+
+    private HttpEntity setMultipartEntity(Map<String,Object> param){
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        for (Map.Entry<String,Object> entry:param.entrySet()){
+            Object value = entry.getValue();
+            if (value instanceof String){
+                StringBody sb = new StringBody((String) entry.getValue(), ContentType.MULTIPART_FORM_DATA);
+                builder.addPart(entry.getKey(),sb);
+            }else if (value instanceof Byte[]){
+                builder.addBinaryBody(entry.getKey(),(byte[])value);
+            }
+        }
+        return builder.build();
     }
     private void setHeader(HttpRequestBase httpRequest,HttpHeaders headers){
         System.out.println("REQUEST header ---------------");
         for (CharSequence name:headers.names()){
-            boolean exclusive = name.toString().equalsIgnoreCase("Content-Length")
-                    ||name.toString().equalsIgnoreCase("Referer");
+            String n = name.toString();
+            boolean exclusive = n.equalsIgnoreCase("Content-Length")||n.equalsIgnoreCase("Referer")
+                    ||n.equalsIgnoreCase("If-Modified-Since")||n.equalsIgnoreCase("If-None-Match");
             if ("Host".equalsIgnoreCase(name.toString())){
                 httpRequest.setHeader(name.toString(), HOST);
-                System.out.println(name.toString() + ":" + HOST);
+                System.out.println(name.toString() + ":" + headers.get(name).toString());
             } else if (!exclusive){
                 httpRequest.setHeader(name.toString(), headers.get(name).toString());
-                System.out.println(name.toString()+":"+headers.get(name).toString());
+                System.out.println(name.toString() + ":" + headers.get(name).toString());
             }
         }
         System.out.println("END header ---------------");
@@ -177,7 +196,20 @@ public class ProxyClient {
         return response;
     }
 
-    public CloseableHttpResponse postEntityRequest(Map<String,String> param,HttpHeaders headers){
+    public CloseableHttpResponse postMultipartEntityRequest(Map<String,Object> param,HttpHeaders headers){
+        setHeader(httpPost,headers);
+        CloseableHttpResponse response = null;
+        try {
+            httpPost.setEntity(setMultipartEntity(param));
+            response = httpclient.execute(httpPost);
+            System.out.println(httpPost.getURI() + " response code : " + response.getStatusLine().getStatusCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    public CloseableHttpResponse postEntityRequest(Map<String, Object> param,HttpHeaders headers){
         setHeader(httpPost,headers);
         CloseableHttpResponse response = null;
         try {
@@ -225,8 +257,8 @@ public class ProxyClient {
     }
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        ProxyClient client = new ProxyClient(new InetSocketAddress("localhost",8080),"/asf-logo.png");
-        DiskUtil.saveToDisk("localhost:8080","/asf-logo.png",client.getResponseBytes(client.fetchImage()));
+        ProxyClient client = new ProxyClient(new InetSocketAddress("localhost",8080),"/tomcat.png");
+        DiskUtil.saveToDisk("localhost:8080","/tomcat.png",client.getResponseBytes(client.fetchImage()));
 //        CloseableHttpClient httpclient = HttpClients.createDefault();
 //        HttpGet httpGet = new HttpGet("localhost:8080");
     }

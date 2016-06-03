@@ -1,7 +1,7 @@
 package org.code4j.jproxy.handler.http;/**
- * Description : SocksServerHandler
- * Created by YangZH on 16-5-25
- *  上午9:18
+ * Description : CSSFilterHandler
+ * Created by YangZH on 16-5-26
+ *  下午5:01
  */
 
 import io.netty.buffer.ByteBuf;
@@ -19,17 +19,19 @@ import org.code4j.jproxy.util.WebUtil;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
- * Description : SocksServerHandler
- * Created by YangZH on 16-5-25
- * 上午9:18
+ * Description : CSSFilterHandler
+ * Created by YangZH on 16-5-26
+ * 下午5:01
  */
 
-public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
-
+public class GetRequestHandler extends SimpleChannelInboundHandler<HttpRequest>{
     private InetSocketAddress address;
+
+    public GetRequestHandler(boolean autoRelease) {
+        super(autoRelease);
+    }
 
     /**
      * 每次请求都重新获取一次地址
@@ -38,43 +40,49 @@ public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
         this.address = IPSelector.filter();
         System.out.println("新获取的地址-->  "+address.getHostName()+":"+address.getPort());
     }
+
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
-        if (request.method().equals(HttpMethod.GET)){
-            Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
-            String context = "";
-            byte[] bytes = null;
-            CloseableHttpResponse response = null;
-            //读取图片
-            if (pattern.matcher(request.uri()).matches()){
-                fetchInetAddress();
-                ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
-                //在这里强转类型，如果使用了聚合器，就会被阻塞
-                System.out.println("读取到图片 " + request.uri());
-                response = client.fetchImage();
-                bytes = client.getResponseBytes(response);
+        String context = "";
+        byte[] bytes = null;
+        CloseableHttpResponse response = null;
+        boolean isGet = request.method().equals(HttpMethod.GET);
+        boolean isJSON = "application/json".equals(request.headers().get("Content-Type"));
+        System.out.println("isGet  "+isGet+"  isJSON  "+isJSON);
+        if (isGet){
+            fetchInetAddress();
+            ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
+            if (isJSON){
+                System.out.println("GET 业务请求");
+                response = client.fetchText(request.headers());
+                context = client.getResponse(response);
+                //redis缓存
+                bytes = context.getBytes();
                 response(ctx, bytes, response.getAllHeaders());
             }else{
-                ReferenceCountUtil.retain(request);
-                ctx.fireChannelRead(request);
+                System.out.println("GET 页面请求");
+                response = client.fetchText(request.headers());
+                context = client.getResponse(response);
+                //CDN缓存
+                bytes = context.getBytes();
+                response(ctx, bytes, response.getAllHeaders());
             }
         }else{
+            System.out.println("非GET请求或JSON类型  "+request.uri());
             ReferenceCountUtil.retain(request);
             ctx.fireChannelRead(request);
         }
-//        System.out.println("ImageHandler并不想处理");
-//        ctx.fireChannelRead(request);
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
+        ctx.channel().flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println("CSS 解析异常");
         cause.printStackTrace();
-        ctx.close();
     }
 
     private void response(ChannelHandlerContext ctx,byte[] contents,Header[] headers) throws UnsupportedEncodingException {
@@ -111,20 +119,5 @@ public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
             }
         }
     }
-
-    /**
-     * 将CSS中的图片读取出来
-     * @param context   CSS文件内容
-     * @param request   请求对象
-     * @param ctx       上下文
-     */
-    private void fetchResource(String context,HttpRequest request,ChannelHandlerContext ctx){
-        Pattern css_pattern = Pattern.compile(".+\\.(" + WebUtil.CSS_FILE + ").*");
-        if (css_pattern.matcher(request.uri()).matches()){
-            fetchImageResource(WebUtil.fetchImageFromString(context),ctx,request.headers());
-        }
-    }
-
-
 
 }

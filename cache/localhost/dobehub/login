@@ -1,0 +1,403 @@
+
+
+
+<html>
+  <head>
+    <title>DobeHub 国内最大的逗比社交圈儿</title>
+    <meta charset="utf-8" />
+	<meta http-equiv="description" content="This is my page">
+	<link href="/dobehub/assets/images/favicon.png" type="image/x-icon" rel="shortcut icon">
+	<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="assets/css/ace.min.css" />
+	<style>
+        body,html{
+            margin:0;
+            padding:0;
+            width:100%;
+            height:100%;
+            font-family: "微软雅黑","Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
+        }
+        .spin{
+            margin-left: 50%;
+        }
+	</style>
+      <script type="text/javascript" src="assets/js/jquery-1.9.1.min.js"></script>
+      <script src="assets/js/spin.min.js"></script>
+  </head>
+  
+  <body class="login-layout" bgcolor="#CCCCCC">
+		<div class="main-container">
+			<div class="main-content">
+				<div class="row">
+					<div class="col-sm-10 col-sm-offset-1">
+						<div class="login-container">
+							<div class="center">
+								<h1>
+									<span class="red">DobeHub</span>
+								</h1>
+								<h2><span class="white">一个逗比交流平台</span></h2>
+								<h4 class="blue">&copy; 天津职业技术师范大学</h4>
+							</div>
+
+							<div class="space-6"></div>
+
+							<div class="position-relative">
+								<div id="login-box" class="login-box visible widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header blue lighter bigger">
+												<i class="icon-coffee green"></i>
+												账户登录
+											</h4>
+
+											<div class="space-6"></div>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="email_login" type="text" class="form-control" placeholder="邮箱" />
+															<i class="icon-user"></i>
+														</span>
+													</label>
+													<label id="account_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="password_login" type="password" class="form-control" placeholder="密码" />
+															<i class="icon-lock"></i>
+														</span>
+													</label>
+													<label id="password_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>
+													<div class="space"></div>
+                                                    <div class="spin"></div>
+													<div class="clearfix">
+														<label id="login_error" class="block notice_lab">
+															<span class="block red"></span>
+														</label>
+														<button id="login_btn" type="button" class="width-35 pull-right btn btn-sm btn-primary">
+															<i class="icon-key"></i>
+															登录
+														</button>
+													</div>
+
+													<div class="space-4"></div>
+												</fieldset>
+											</form>
+										</div><!-- /widget-main -->
+
+										<div class="toolbar clearfix">
+											<div>
+												<a href="#" onclick="javascript:show_box('forgot-box'); " class="forgot-password-link">
+													<i class="icon-arrow-left"></i>
+													忘记密码
+												</a>
+											</div>
+
+											<div>
+												<a href="#" onclick="javascript:show_box('signup-box'); " class="user-signup-link">
+													加入我们
+													<i class="icon-arrow-right"></i>
+												</a>
+											</div>
+										</div>
+									</div><!-- /widget-body -->
+								</div><!-- /login-box -->
+
+								<div id="forgot-box" class="forgot-box widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header red lighter bigger">
+												<i class="icon-key"></i>
+												找回密码
+											</h4>
+
+											<div class="space-6"></div>
+											<p>
+												输入邮箱找回密码
+											</p>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="email" class="form-control" placeholder="邮箱" />
+															<i class="icon-envelope"></i>
+														</span>
+													</label>
+													<label id="retrieve_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>		
+													<div class="clearfix">
+														<button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+															<i class="icon-lightbulb"></i>
+															确认发送！
+														</button>
+													</div>
+												</fieldset>
+											</form>
+										</div><!-- /widget-main -->
+
+										<div class="toolbar center">
+											<a href="#" onclick="javascript:show_box('login-box'); " class="back-to-login-link">
+												返回登陆
+												<i class="icon-arrow-right"></i>
+											</a>
+										</div>
+									</div><!-- /widget-body -->
+								</div><!-- /forgot-box -->
+
+								<div id="signup-box" class="signup-box widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header green lighter bigger">
+												<i class="icon-group blue"></i>
+												新用户注册
+											</h4>
+
+											<div class="space-6"></div>
+											<p> 请填写基本信息: </p>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="email_reg" type="email" class="form-control" placeholder="邮箱" />
+															<i class="icon-envelope"></i>
+														</span>
+													</label>
+													<label id="email_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>		
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="username_reg" type="text" class="form-control" placeholder="用户名" />
+															<i class="icon-user"></i>
+														</span>
+													</label>
+													<label id="um_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>		
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="password_reg" type="password" class="form-control" placeholder="密码" />
+															<i class="icon-lock"></i>
+														</span>
+													</label>
+													<label id="pwd_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>		
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="repassword_reg" type="password" class="form-control" placeholder="确认密码" />
+															<i class="icon-retweet"></i>
+														</span>
+													</label>
+													<label id="repwd_error" class="block notice_lab">
+														<span class="block red"></span>
+													</label>	
+													<div class="space-24"></div>
+													<div class="clearfix">
+														<button type="reset" class="width-30 pull-left btn btn-sm">
+															<i class="icon-refresh"></i>
+															重置
+														</button>
+														<button id="reg_btn" type="button" class="width-65 pull-right btn btn-sm btn-success">
+															注册
+															<i class="icon-arrow-right icon-on-right"></i>
+														</button>
+													</div>
+													<div class="clearfix">
+														<label id="regist_error" class="block notice_lab">
+															<span class="block red"></span>
+														</label>	
+													</div>
+												</fieldset>
+											</form>
+										</div>
+										<div class="toolbar center">
+											<a href="#" onclick="javascript:show_box('login-box'); " class="back-to-login-link">
+												<i class="icon-arrow-left"></i>
+												返回登陆
+											</a>
+										</div>
+									</div><!-- /widget-body -->
+								</div><!-- /signup-box -->
+							</div><!-- /position-relative -->
+						</div>
+					</div><!-- /.col -->
+				</div><!-- /.row -->
+			</div>
+		</div><!-- /.main-container -->
+
+		<!-- basic scripts -->
+		<!--[if !IE]> -->
+		<script type="text/javascript">
+			window.jQuery || document.write("<script src='/dobehub/assets/js/jquery-1.9.1.min.js'>"+"<"+"/script>");
+		</script>
+		<!-- inline scripts related to this page -->
+        <script type="application/javascript">
+            /**
+             * Description :
+             * Created by YangZH on 16-1-29
+             *  上午12:32
+             */
+            var filter  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            var opts = {
+                lines: 13, // 花瓣数目
+                length: 7, // 花瓣长度
+                width: 4, // 花瓣宽度
+                radius: 10, // 花瓣距中心半径
+                corners: 1, // 花瓣圆滑度 (0-1)
+                rotate: 0, // 花瓣旋转角度
+                direction: 1, // 花瓣旋转方向 1: 顺时针, -1: 逆时针
+                color: '#5882FA', // 花瓣颜色
+                speed: 1, // 花瓣旋转速度
+                trail: 60, // 花瓣旋转时的拖影(百分比)
+                shadow: false, // 花瓣是否显示阴影
+                hwaccel: false, //spinner 是否启用硬件加速及高速旋转
+                className: 'spinner', // spinner css 样式名称
+                zIndex: 2e9, // spinner的z轴 (默认是2000000000)
+                top: 'auto', // spinner 相对父容器Top定位 单位 px
+                left: 'auto'// spinner 相对父容器Left定位 单位 px
+            };
+            var spinner = new Spinner(opts);
+//            var target = $(".spin").get(0);
+//            spinner.spin(target);
+            $(function(){
+                registActionEvent();
+            })
+            function registActionEvent(){
+                $("#login_btn").click(function(){
+                    loginAction();
+                });
+                $("#reg_btn").click(function(){
+                    registAction();
+                });
+                $("#email_reg").focus(function(){
+                    clearNotice("email_reg");
+                });
+                $("#username_reg").focus(function(){
+                    clearNotice("username_reg");
+                });
+                $("#password_reg").focus(function(){
+                    clearNotice("password_reg");
+                });
+                $("#repassword_reg").focus(function(){
+                    clearNotice("repassword_reg");
+                });
+                $("#email_login").focus(function(){
+                    clearNotice("email_login");
+                });
+                $("#password_login").focus(function(){
+                    clearNotice("password_login");
+                });
+            }
+            function registAction(){
+                var email = $("#email_reg").val();
+                var username = $("#username_reg").val();
+                var password = $("#password_reg").val();
+                var repassword = $("#repassword_reg").val();
+                var json = {email:email,password:password,username:username}
+                var flag = true;
+                if(!filter.test(email)){
+                    showAlert("email_error","请填写正确格式的邮箱！");
+                    $("#email_reg").val("");
+                    flag = false;
+                }
+                if(username==""){
+                    showAlert("um_error","请填写完整的用户名！");
+                    flag = false;
+                }
+                if(password==""){
+                    showAlert("pwd_error","请填写完整的密码！");
+                    flag = false;
+                }else if(password != repassword){
+                    showAlert("pwd_error","两次密码输入不一致！");
+                    showAlert("repwd_error","两次密码输入不一致！");
+                    $("#password_reg").val("");
+                    $("#repassword_reg").val("");
+                    flag = false;
+                }
+                if(repassword==""){
+                    showAlert("repwd_error","请填写完整的密码！");
+                    flag = false;
+                }
+                if(flag){
+                    $.ajax({
+                        type:"POST",
+                        url:"/dobehub/user/regist",
+                        dataType:"json",
+                        contentType:"application/json",
+                        data:JSON.stringify(json),
+                        success:function(data){
+                            clearAllNotice();
+                            if(data.result.code==500){
+                                showAlert("email_error", data.result.message);
+                            }else{
+                                window.location.href = "/dobehub/index"
+                            }
+                        }
+                    });
+                }
+            }
+
+            function loginAction(){
+                var email = $("#email_login").val();
+                var password = $("#password_login").val();
+                var json = {email:email,password:password}
+                var flag = true;
+                if(!filter.test(email)){
+                    showAlert("account_error","请填写正确格式的邮箱")
+                    flag = false;
+                }
+                if(password==""){
+                    showAlert("password_error","请填写完整的密码")
+                    flag = false;
+                }
+                if(flag){
+                    $.ajax({
+                        type:"POST",
+                        url:"/dobehub/user/login",
+                        dataType:"json",
+                        contentType:"application/json",
+                        data:JSON.stringify(json),
+                        beforeSend: function () {
+                            //异步请求时spinner出现
+                            $(".spin").text("");
+                            var target = $(".spin").get(0);
+                            spinner.spin(target);
+                        },
+                        success:function(data){
+                            if(data.code==200){
+                                window.location.href = "/dobehub/index"
+                            }else{
+                                showAlert("login_error", data.message);
+                            }
+                            spinner.spin();
+                        }
+                    });
+                }
+            }
+            function showAlert(id,message){
+                $("#"+id+">span").html(message)
+            }
+            function show_box(id) {
+                jQuery('.widget-box.visible').removeClass('visible');
+                jQuery('#'+id).addClass('visible');
+                $(".notice_lab>span").html("")
+                return false;
+            }
+            function clearAllNotice(){
+                $(".notice_lab>span").html("")
+            }
+            function clearNotice(id){
+                $("#"+id).parent().parent().next().children().html("");
+            }
+        </script>
+</body>
+</html>
