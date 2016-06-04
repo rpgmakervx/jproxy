@@ -6,6 +6,7 @@ package org.code4j.jproxy.server;/**
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.code4j.jproxy.crypt.EncryptUtil;
 import org.code4j.jproxy.util.Configuration;
 
 import java.net.InetSocketAddress;
@@ -18,6 +19,10 @@ import java.util.*;
  */
 
 public class IPSelector {
+
+    public enum LBMode{
+        POLL,WEIGHT,IP_HASH
+    }
 
     static List<String> hostsname = new ArrayList<String>();
     static List<Integer> ports = new ArrayList<Integer>();
@@ -71,9 +76,15 @@ public class IPSelector {
      * 随机过滤出一个地址
      * @return
      */
-    public static InetSocketAddress filter(){
+
+    public static InetSocketAddress weight(){
         Random rand = new Random();
         int randcode = rand.nextInt(weight_sum);
         return new InetSocketAddress(hostsname.get(randcode),ports.get(randcode));
+    }
+
+    public static InetSocketAddress ip_hash(String ip){
+        int hash = EncryptUtil.ip_hash(ip);
+        return new InetSocketAddress(hostsname.get(hash%hostsname.size()),ports.get(hash%ports.size()));
     }
 }

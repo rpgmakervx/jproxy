@@ -65,38 +65,12 @@ public class ProxyClient {
             httpPost = new HttpPost(host+address.getPort()+uri);
             httpGet = new HttpGet(host+address.getPort()+uri);
         }
-        System.out.println("client url : "+url);
     }
 
     public void setUrl(String url){
         httpPost = new HttpPost(url);
         httpGet = new HttpGet(url);
     }
-    //    private ChannelFuture future;
-//
-//    public void connect(String remoteHost,int remotePort){
-//        System.out.println("代理访问端正在链接远程服务器.....");
-//        EventLoopGroup group = new NioEventLoopGroup();
-//        Bootstrap b = new Bootstrap();
-//        try {
-//            b.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
-//                @Override
-//                protected void initChannel(SocketChannel socketChannel) throws Exception {
-//                    socketChannel.pipeline().addLast(new HttpResponseEncoder());
-//                    socketChannel.pipeline().addLast(new HttpRequestDecoder());
-//                    socketChannel.pipeline().addLast(new ClientHandler());
-//                }
-//            }).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_BACKLOG, 128);
-//            future = b.connect(remoteHost, remotePort).sync();
-//            sendRequest();
-//            sendRequest();
-//            future.channel().closeFuture().sync();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }finally {
-//            group.shutdownGracefully();
-//        }
-//    }
 
     public CloseableHttpResponse fetchText(){
         CloseableHttpResponse response = null;
@@ -125,7 +99,7 @@ public class ProxyClient {
         CloseableHttpResponse response = null;
         try {
             response = httpclient.execute(httpGet);
-            System.out.println(httpGet.getURI()+" response code : "+response.getStatusLine().getStatusCode());
+            System.out.println(" response code : "+response.getStatusLine().getStatusCode());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -165,20 +139,20 @@ public class ProxyClient {
         return builder.build();
     }
     private void setHeader(HttpRequestBase httpRequest,HttpHeaders headers){
-        System.out.println("REQUEST header ---------------");
+//        System.out.println("REQUEST header ---------------");
         for (CharSequence name:headers.names()){
             String n = name.toString();
             boolean exclusive = n.equalsIgnoreCase("Content-Length")||n.equalsIgnoreCase("Referer")
                     ||n.equalsIgnoreCase("If-Modified-Since")||n.equalsIgnoreCase("If-None-Match");
             if ("Host".equalsIgnoreCase(name.toString())){
                 httpRequest.setHeader(name.toString(), HOST);
-                System.out.println(name.toString() + ":" + headers.get(name).toString());
+//                System.out.println(name.toString() + ":" + headers.get(name).toString());
             } else if (!exclusive){
                 httpRequest.setHeader(name.toString(), headers.get(name).toString());
-                System.out.println(name.toString() + ":" + headers.get(name).toString());
+//                System.out.println(name.toString() + ":" + headers.get(name).toString());
             }
         }
-        System.out.println("END header ---------------");
+//        System.out.println("END header ---------------");
     }
 
     public CloseableHttpResponse postJsonRequest(String json,HttpHeaders headers){
@@ -189,7 +163,7 @@ public class ProxyClient {
             s = new StringEntity(json);
             httpPost.setEntity(s);
             response = httpclient.execute(httpPost);
-            System.out.println(httpPost.getURI() + " response code : " + response.getStatusLine().getStatusCode());
+            System.out.println(" response code : " + response.getStatusLine().getStatusCode());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -202,7 +176,7 @@ public class ProxyClient {
         try {
             httpPost.setEntity(setMultipartEntity(param));
             response = httpclient.execute(httpPost);
-            System.out.println(httpPost.getURI() + " response code : " + response.getStatusLine().getStatusCode());
+            System.out.println(" response code : " + response.getStatusLine().getStatusCode());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -215,7 +189,7 @@ public class ProxyClient {
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(setRequestData(param),"UTF-8"));
             response = httpclient.execute(httpPost);
-            System.out.println(httpPost.getURI() + " response code : " + response.getStatusLine().getStatusCode());
+            System.out.println(" response code : " + response.getStatusLine().getStatusCode());
         } catch (IOException e) {
             e.printStackTrace();
         }

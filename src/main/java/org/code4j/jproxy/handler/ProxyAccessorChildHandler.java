@@ -11,7 +11,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import org.code4j.jproxy.handler.http.HttpProxyAccessorHandler;
 
 /**
  * Description :
@@ -32,6 +31,5 @@ public class ProxyAccessorChildHandler extends ChannelInitializer<SocketChannel>
         pipeline.addLast(new HttpRequestDecoder());
         pipeline.addLast(new HttpResponseEncoder());
         pipeline.addLast(new HttpObjectAggregator(65535));
-        pipeline.addLast(new HttpProxyAccessorHandler(ctx));
     }
 }

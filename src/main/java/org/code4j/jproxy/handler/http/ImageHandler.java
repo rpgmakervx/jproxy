@@ -7,9 +7,8 @@ package org.code4j.jproxy.handler.http;/**
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
-import io.netty.util.ReferenceCountUtil;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.code4j.jproxy.client.ProxyClient;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
  * 上午9:18
  */
 
-public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
+public class ImageHandler extends ChannelInboundHandlerAdapter{
 
     private InetSocketAddress address;
 
@@ -35,11 +34,17 @@ public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
      * 每次请求都重新获取一次地址
      */
     public void fetchInetAddress(){
-        this.address = IPSelector.filter();
+        this.address = IPSelector.weight();
         System.out.println("新获取的地址-->  "+address.getHostName()+":"+address.getPort());
     }
+
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        messageReceived(ctx,msg);
+    }
+
+    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
+        HttpRequest request = (HttpRequest) msg;
         if (request.method().equals(HttpMethod.GET)){
             Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
             String context = "";
@@ -55,11 +60,11 @@ public class ImageHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 bytes = client.getResponseBytes(response);
                 response(ctx, bytes, response.getAllHeaders());
             }else{
-                ReferenceCountUtil.retain(request);
+//                ReferenceCountUtil.retain(request);
                 ctx.fireChannelRead(request);
             }
         }else{
-            ReferenceCountUtil.retain(request);
+//            ReferenceCountUtil.retain(request);
             ctx.fireChannelRead(request);
         }
 //        System.out.println("ImageHandler并不想处理");
