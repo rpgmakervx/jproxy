@@ -47,7 +47,7 @@ public class GetRequestHandler extends ChannelInboundHandlerAdapter {
         CloseableHttpResponse response = null;
         HttpRequest request = (HttpRequest) msg;
         boolean isGet = request.method().equals(HttpMethod.GET);
-        boolean isJSON = request.headers().get("Content-Type").contains("application/json");
+        boolean isJSON = "application/json".equals(request.headers().get("Content-Type"));
         if (isGet){
             fetchInetAddress();
             ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());

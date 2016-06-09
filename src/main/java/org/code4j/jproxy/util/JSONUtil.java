@@ -5,9 +5,11 @@ package org.code4j.jproxy.util;/**
  */
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,8 +20,8 @@ import java.util.Map;
 
 public class JSONUtil {
 
-    public static void strToJsonArray(String json){
-        JSONObject.parseArray(json);
+    public static List<String> strToArray(String json){
+        return JSONArray.parseArray(json,String.class);
     }
 
     public static Map<String,Object> strToMap(String json){

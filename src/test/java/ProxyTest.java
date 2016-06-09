@@ -78,7 +78,7 @@ public class ProxyTest {
 
     @Test
     public void testLoadBalance(){
-        InetSocketAddress address = IPSelector.filter();
+        InetSocketAddress address = IPSelector.weight();
         System.out.println(address.getHostName()+":"+address.getPort());
     }
 }
