@@ -30,6 +30,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Description :
@@ -37,10 +39,11 @@ import java.util.Map;
  * 下午10:47
  */
 
-public class ProxyClient {
+public class ProxyClient{
 
 
     CloseableHttpClient httpclient = HttpClients.createDefault();
+    CloseableHttpResponse response;
     HttpPost httpPost;
     HttpGet httpGet;
     HttpHost httpHost;
@@ -96,7 +99,6 @@ public class ProxyClient {
 
     public CloseableHttpResponse fetchText(HttpHeaders headers){
         setHeader(httpGet,headers);
-        CloseableHttpResponse response = null;
         try {
             response = httpclient.execute(httpGet);
             System.out.println(" response code : "+response.getStatusLine().getStatusCode());
@@ -236,4 +238,5 @@ public class ProxyClient {
 //        CloseableHttpClient httpclient = HttpClients.createDefault();
 //        HttpGet httpGet = new HttpGet("localhost:8080");
     }
+
 }

@@ -18,6 +18,8 @@ import org.code4j.jproxy.util.WebUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Description : CSSFilterHandler
@@ -28,6 +30,8 @@ import java.net.InetSocketAddress;
 public class GetRequestHandler extends ChannelInboundHandlerAdapter {
     private InetSocketAddress address;
     private RequestDataDao dao = new RequestDataDao();
+    private ExecutorService threadPool = Executors.newCachedThreadPool();
+
     /**
      * 每次请求都重新获取一次地址
      */
@@ -42,42 +46,7 @@ public class GetRequestHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
-        String context = "";
-        byte[] bytes = null;
-        CloseableHttpResponse response = null;
-        HttpRequest request = (HttpRequest) msg;
-        boolean isGet = request.method().equals(HttpMethod.GET);
-        boolean isJSON = "application/json".equals(request.headers().get("Content-Type"));
-        if (isGet){
-            fetchInetAddress();
-            ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
-            if (isJSON){
-                System.out.println("GET 业务请求");
-                //redis缓存
-                String cache = dao.get(request.uri(),"");
-                if (cache == null ||cache.isEmpty()){
-                    System.out.println("cache没有命中");
-                    response = client.fetchText(request.headers());
-                    context = client.getResponse(response);
-                    dao.save(request.uri(),"",context);
-                    bytes = context.getBytes();
-                    response(ctx, bytes, response.getAllHeaders());
-                }else{
-                    System.out.println("cache命中！ "+cache);
-                    response(ctx, cache.getBytes());
-                }
-            }else{
-                System.out.println("GET 页面请求");
-                response = client.fetchText(request.headers());
-                context = client.getResponse(response);
-                //CDN缓存
-                bytes = context.getBytes();
-                response(ctx, bytes, response.getAllHeaders());
-            }
-        }else{
-            System.out.println("非GET请求或JSON类型  "+request.uri());
-            ctx.fireChannelRead(request);
-        }
+        threadPool.submit(new Task(ctx,msg));
     }
 
     @Override
@@ -112,4 +81,57 @@ public class GetRequestHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
+    class Task implements Runnable{
+        Object msg;
+        ChannelHandlerContext ctx;
+
+        public Task( ChannelHandlerContext ctx,Object msg) {
+            this.msg = msg;
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void run() {
+            String context = "";
+            byte[] bytes = null;
+            CloseableHttpResponse response = null;
+            HttpRequest request = (HttpRequest) msg;
+            boolean isGet = request.method().equals(HttpMethod.GET);
+            boolean isJSON = "application/json".equals(request.headers().get("Content-Type"));
+            try {
+                if (isGet){
+                    fetchInetAddress();
+                    ProxyClient client = new ProxyClient(address, WebUtil.ROOT.equals(request.uri())?"":request.uri());
+                    if (isJSON){
+                        System.out.println("GET 业务请求");
+                        //redis缓存
+                        String cache = dao.get(request.uri(),"");
+                        if (cache == null ||cache.isEmpty()){
+                            System.out.println("cache没有命中");
+                            response = client.fetchText(request.headers());
+                            context = client.getResponse(response);
+                            dao.save(request.uri(),"",context);
+                            bytes = context.getBytes();
+                            response(ctx, bytes, response.getAllHeaders());
+                        }else{
+                            System.out.println("cache命中！ "+cache);
+                            response(ctx, cache.getBytes());
+                        }
+                    }else{
+                        System.out.println("GET 页面请求");
+                        response = client.fetchText(request.headers());
+                        context = client.getResponse(response);
+                        //CDN缓存
+                        bytes = context.getBytes();
+                        response(ctx, bytes, response.getAllHeaders());
+                    }
+                }else{
+                    System.out.println("非GET请求或JSON类型  "+request.uri());
+                    ctx.fireChannelRead(request);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
 }

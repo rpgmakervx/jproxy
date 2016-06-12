@@ -44,7 +44,23 @@
             <artifactId>httpmime</artifactId>
             <version>4.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>net.contentobjects.jnotify</groupId>
+            <artifactId>jnotify</artifactId>
+            <version>0.94</version>
+        </dependency>
+
     </dependencies>
 
-
+    <!-- 在central库中没有这个包，需要添加以下的repo -->
+    <repositories>
+        <repository>
+            <id>bintray</id>
+            <url>http://dl.bintray.com/typesafe/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>oschina</id>
+            <url>http://maven.oschina.net/content/groups/public/</url>
+        </repository>
+    </repositories>
 </project>

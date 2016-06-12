@@ -17,7 +17,8 @@ import org.code4j.jproxy.util.WebUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 public class ImageHandler extends ChannelInboundHandlerAdapter{
 
     private InetSocketAddress address;
-
+    private ExecutorService threadPool = Executors.newCachedThreadPool();
     /**
      * 每次请求都重新获取一次地址
      */
@@ -44,31 +45,7 @@ public class ImageHandler extends ChannelInboundHandlerAdapter{
     }
 
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
-        HttpRequest request = (HttpRequest) msg;
-        if (request.method().equals(HttpMethod.GET)){
-            Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
-            String context = "";
-            byte[] bytes = null;
-            CloseableHttpResponse response = null;
-            //读取图片
-            if (pattern.matcher(request.uri()).matches()){
-                fetchInetAddress();
-                ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
-                //在这里强转类型，如果使用了聚合器，就会被阻塞
-                System.out.println("读取到图片 " + request.uri());
-                response = client.fetchImage();
-                bytes = client.getResponseBytes(response);
-                response(ctx, bytes, response.getAllHeaders());
-            }else{
-//                ReferenceCountUtil.retain(request);
-                ctx.fireChannelRead(request);
-            }
-        }else{
-//            ReferenceCountUtil.retain(request);
-            ctx.fireChannelRead(request);
-        }
-//        System.out.println("ImageHandler并不想处理");
-//        ctx.fireChannelRead(request);
+        threadPool.submit(new Task(ctx,msg));
     }
 
     @Override
@@ -95,41 +72,44 @@ public class ImageHandler extends ChannelInboundHandlerAdapter{
         ctx.channel().writeAndFlush(response);
         ctx.close();
     }
-    private void fetchImageResource(List<String> uris,ChannelHandlerContext ctx,HttpHeaders headers){
-        for (String uri:uris){
-            ProxyClient client;
-            CloseableHttpResponse response = null;
-            if (uri.contains(WebUtil.HTTP)||uri.contains(WebUtil.HTTPS)){
-                uri = uri.replace(WebUtil.HTTP,"").replace(WebUtil.HTTPS,"");
-                String host = uri.split("/")[0];
-                uri = uri.replace(host,"");
-                client = new ProxyClient(new InetSocketAddress(host,80),uri);
-            }else{
-                client = new ProxyClient(address,uri);
-            }
-            response = client.fetchImage(headers);
-            byte[] bytes = client.getResponseBytes(response);
+
+    class Task implements Runnable{
+
+        Object msg;
+        ChannelHandlerContext ctx;
+
+        public Task( ChannelHandlerContext ctx,Object msg) {
+            this.msg = msg;
+            this.ctx = ctx;
+        }
+        @Override
+        public void run() {
+            HttpRequest request = (HttpRequest) msg;
             try {
-                response(ctx, bytes, response.getAllHeaders());
-            } catch (UnsupportedEncodingException e) {
+                if (request.method().equals(HttpMethod.GET)){
+                    Pattern pattern = Pattern.compile(".+\\.("+ WebUtil.IMAGE+").*");
+                    String context = "";
+                    byte[] bytes = null;
+                    CloseableHttpResponse response = null;
+                    //读取图片
+                    if (pattern.matcher(request.uri()).matches()){
+                        fetchInetAddress();
+                        ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
+                        //在这里强转类型，如果使用了聚合器，就会被阻塞
+                        System.out.println("读取到图片 " + request.uri());
+                        response = client.fetchImage();
+                        bytes = client.getResponseBytes(response);
+                        response(ctx, bytes, response.getAllHeaders());
+                    }else{
+                        ctx.fireChannelRead(request);
+                    }
+                }else{
+                    ctx.fireChannelRead(request);
+                }
+            }catch (Exception e){
                 e.printStackTrace();
             }
         }
     }
-
-    /**
-     * 将CSS中的图片读取出来
-     * @param context   CSS文件内容
-     * @param request   请求对象
-     * @param ctx       上下文
-     */
-    private void fetchResource(String context,HttpRequest request,ChannelHandlerContext ctx){
-        Pattern css_pattern = Pattern.compile(".+\\.(" + WebUtil.CSS_FILE + ").*");
-        if (css_pattern.matcher(request.uri()).matches()){
-            fetchImageResource(WebUtil.fetchImageFromString(context),ctx,request.headers());
-        }
-    }
-
-
 
 }
