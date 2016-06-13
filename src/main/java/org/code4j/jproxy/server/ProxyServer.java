@@ -10,7 +10,9 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.code4j.jproxy.constans.Const;
 import org.code4j.jproxy.handler.ServerChildHandler;
+import org.code4j.jproxy.util.Configuration;
 
 /**
  * Description : server
@@ -21,7 +23,7 @@ import org.code4j.jproxy.handler.ServerChildHandler;
 public class ProxyServer {
 
 
-    public void startup(int port){
+    public void startup(){
         System.out.println("正在启动服务。。。");
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -31,7 +33,7 @@ public class ProxyServer {
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .childHandler(new ServerChildHandler())
                     .option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
-            f = b.bind(port).sync();
+            f = b.bind(Configuration.getIntValue(Const.LISTEN)).sync();
             System.out.println("服务已启动");
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {

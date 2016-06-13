@@ -1,0 +1,23 @@
+#!/bin/sh  
+#============ get the file name ===========  
+
+sudo service ufw stop
+sudo service iptables stop
+cd ..
+path=`pwd`
+folder=${path}"/lib"
+main_jar=":jproxy.jar"
+all_jar=""  
+
+config_file=${path}"/lib/config.json"
+for file in ${folder}/*; do  
+    temp_file=`basename $file`  
+    all_jar="${all_jar}:${folder}/${temp_file}"
+done
+main_class="org.code4j.jproxy.run.Main"
+cd "bin"
+if [ -n "$1" ];then
+	java -cp $all_jar$main_jar $main_class ${config_file}	
+else 
+	java -cp $all_jar$main_jar $main_class $1
+fi

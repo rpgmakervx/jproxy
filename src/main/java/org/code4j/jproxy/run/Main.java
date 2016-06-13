@@ -1,4 +1,4 @@
-package org.code4j.jproxy.test;/**
+package org.code4j.jproxy.run;/**
  * Description : 
  * Created by YangZH on 16-5-25
  *  下午2:28
@@ -22,7 +22,7 @@ public class Main {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new ProxyServer().startup(9524);
+                new ProxyServer().startup();
             }
         }).start();
     }

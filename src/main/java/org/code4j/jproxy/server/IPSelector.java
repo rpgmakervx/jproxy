@@ -6,6 +6,7 @@ package org.code4j.jproxy.server;/**
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.code4j.jproxy.constans.Const;
 import org.code4j.jproxy.crypt.EncryptUtil;
 import org.code4j.jproxy.util.Configuration;
 
@@ -29,22 +30,20 @@ public class IPSelector {
     //经过修正的权值
     static List<Integer> weights = new ArrayList<Integer>();
     static List<Map<String,Object>> proxys = new ArrayList<Map<String, Object>>();
-    static Configuration config;
     static int weight_sum = 0;
     //加载配置文件，并计算配置信息（主要是计算权重）
     static{
-        config = new Configuration();
-        JSONArray array = config.params.getJSONArray("proxy_pass");
+        JSONArray array = Configuration.params.getJSONArray("proxy_pass");
         //先把权重和IP 端口相关信息记录到内存（各个List）中，记录总权重
         for (int index=0;index<array.size();index++){
             JSONObject object = array.getJSONObject(index);
             Map<String,Object> proxy = new HashMap<String, Object>();
-            float weight = object.getFloatValue(Configuration.WEIGHT);
-            int port = object.getIntValue(Configuration.PORT);
-            String host = object.getString(Configuration.HOST);
-            proxy.put(Configuration.WEIGHT,weight);
-            proxy.put(Configuration.PORT,port);
-            proxy.put(Configuration.HOST,host);
+            float weight = object.getFloatValue(Const.WEIGHT);
+            int port = object.getIntValue(Const.PORT);
+            String host = object.getString(Const.HOST);
+            proxy.put(Const.WEIGHT,weight);
+            proxy.put(Const.PORT,port);
+            proxy.put(Const.HOST,host);
             weight_sum += weight;
             weights.add((int) Math.rint(weight));
             proxys.add(proxy);

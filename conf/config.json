@@ -1,0 +1,10 @@
+{
+  "listen":9524,
+  "proxy_pass":[
+    {
+      "host":"localhost",
+      "port":8080,
+      "weight":1
+    }
+  ]
+}

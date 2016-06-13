@@ -19,15 +19,14 @@ import java.io.InputStreamReader;
 
 public class Configuration {
 
-    public static final String PROXY_PASS = "proxy_pass";
-    public static final String LISTEN = "listen";
-    public static final String WEIGHT = "weight";
-    public static final String HOST = "host";
-    public static final String PORT = "port";
-    public JSONObject params;
+
+    public static JSONObject params;
     public Configuration() {
+
+    }
+
+    static {
         InputStream is = Configuration.class.getResourceAsStream("/config.json");
-        System.out.println(is);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         StringBuffer sb = new StringBuffer();
         String str = "";
@@ -52,8 +51,10 @@ public class Configuration {
         String json = sb.toString();
         params = JSONObject.parseObject(json);
     }
-
-    public Object getParam(String param){
-        return params.get(param);
+    public static String getStringValue(String param){
+        return params.getString(param);
+    }
+    public static Integer getIntValue(String param){
+        return params.getIntValue(param);
     }
 }
