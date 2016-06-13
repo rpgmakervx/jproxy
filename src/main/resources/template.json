@@ -1,5 +1,0 @@
-{
-  "classname":"org.code4j.rpc.service.impl.EchoServiceImpl",
-  "methodname":"sayHello",
-  "params":"liuwenzhen"
-}

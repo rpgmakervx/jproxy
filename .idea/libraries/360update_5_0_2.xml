@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="360update-5.0.2">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/360update-5.0.2.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
