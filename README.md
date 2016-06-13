@@ -8,7 +8,7 @@ you can visit real server's address via jproxy's address,just like squid,zproxy 
 ---
 ###jproxy's directory structure
 **jproxy's** directory just like tomcat's or jmeter's 
-- **bin**: to launch jproxy by `startup` shell, you can use `startup /etc/jproxy/config.json` to run this application by custom configuration file(it must be named as `config.json`)
+- **bin**: to launch jproxy by `startup` shell, you can also use `startup /etc/jproxy/config.json` to run this application by custom configuration file(it must be named as `config.json`)
 - **lib**: this directory include the jar's dependented by jproxy, you ***should not ***move
 - **conf** the place where jproxy's default configuration files lay
 - **docs**documents about jproxy (sorry but I haven't finished it yet  — — | )
