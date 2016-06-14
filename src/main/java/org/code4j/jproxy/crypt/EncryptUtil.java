@@ -65,4 +65,5 @@ public class EncryptUtil {
         //   return (hash & M_MASK);
         return hash;
     }
+
 }
