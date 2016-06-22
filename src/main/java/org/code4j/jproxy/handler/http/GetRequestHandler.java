@@ -107,18 +107,15 @@ public class GetRequestHandler extends ChannelInboundHandlerAdapter {
                         //redis缓存
                         String cache = dao.get(request.uri(),"");
                         if (cache == null ||cache.isEmpty()){
-                            System.out.println("cache没有命中");
                             response = client.fetchText(request.headers());
                             context = client.getResponse(response);
                             dao.save(request.uri(),"",context);
                             bytes = context.getBytes();
                             response(ctx, bytes, response.getAllHeaders());
                         }else{
-                            System.out.println("cache命中！ "+cache);
                             response(ctx, cache.getBytes());
                         }
                     }else{
-                        System.out.println("GET 页面请求");
                         response = client.fetchText(request.headers());
                         context = client.getResponse(response);
                         //CDN缓存
