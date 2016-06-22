@@ -9,7 +9,7 @@ folder=${path}"/lib"
 main_jar=":jproxy.jar"
 all_jar=""  
 
-config_file=${path}"/lib/config.json"
+config_file=${path}"/conf/config.json"
 for file in ${folder}/*; do  
     temp_file=`basename $file`  
     all_jar="${all_jar}:${folder}/${temp_file}"
