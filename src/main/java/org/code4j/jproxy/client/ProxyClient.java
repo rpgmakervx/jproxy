@@ -30,8 +30,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Description :
@@ -144,12 +142,11 @@ public class ProxyClient{
 //        System.out.println("REQUEST header ---------------");
         for (CharSequence name:headers.names()){
             String n = name.toString();
-            boolean exclusive = n.equalsIgnoreCase("Content-Length")||n.equalsIgnoreCase("Referer")
-                    ||n.equalsIgnoreCase("If-Modified-Since")||n.equalsIgnoreCase("If-None-Match");
-            if ("Host".equalsIgnoreCase(name.toString())){
-                httpRequest.setHeader(name.toString(), HOST);
-//                System.out.println(name.toString() + ":" + headers.get(name).toString());
-            } else if (!exclusive){
+            boolean exclusive = n.equalsIgnoreCase("Content-Length")
+                    ||n.equalsIgnoreCase("Referer")
+                    ||n.equalsIgnoreCase("If-Modified-Since")
+                    ||n.equalsIgnoreCase("If-None-Match");
+            if (!exclusive){
                 httpRequest.setHeader(name.toString(), headers.get(name).toString());
 //                System.out.println(name.toString() + ":" + headers.get(name).toString());
             }

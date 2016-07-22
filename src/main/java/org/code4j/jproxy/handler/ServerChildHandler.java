@@ -11,7 +11,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.code4j.jproxy.handler.http.GetRequestHandler;
-import org.code4j.jproxy.handler.http.ImageHandler;
+import org.code4j.jproxy.handler.http.AntiLeechHandler;
+import org.code4j.jproxy.handler.http.LoggerHandler;
 import org.code4j.jproxy.handler.http.PostRequestHandler;
 
 
@@ -29,7 +30,8 @@ public class ServerChildHandler extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("decoder",new HttpRequestDecoder());
         pipeline.addLast("encoder",new HttpResponseEncoder());
         pipeline.addLast("aggregator",new HttpObjectAggregator(1024000));
-        pipeline.addLast("image_handler",new ImageHandler());
+        pipeline.addLast(new LoggerHandler());
+        pipeline.addLast("image_handler",new AntiLeechHandler());
         pipeline.addLast("get_handler",new GetRequestHandler());
         pipeline.addLast("post_handler",new PostRequestHandler());
     }

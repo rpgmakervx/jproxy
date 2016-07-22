@@ -104,6 +104,7 @@ public class PostRequestHandler extends ChannelInboundHandlerAdapter {
                     byte[] bytes = null;
                     System.out.println("POST 请求");
                     HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
+
                     if (decoder.isMultipart()){
                         StringBuffer sb = new StringBuffer();
                         try{

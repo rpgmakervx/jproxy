@@ -33,7 +33,7 @@ public class IPSelector {
     static int weight_sum = 0;
     //加载配置文件，并计算配置信息（主要是计算权重）
     static{
-        JSONArray array = Configuration.params.getJSONArray("proxy_pass");
+        JSONArray array = Configuration.params.getJSONArray(Const.PROXY_PASS);
         //先把权重和IP 端口相关信息记录到内存（各个List）中，记录总权重
         for (int index=0;index<array.size();index++){
             JSONObject object = array.getJSONObject(index);
@@ -83,7 +83,7 @@ public class IPSelector {
     }
 
     public static InetSocketAddress ip_hash(String ip){
-        int hash = EncryptUtil.ip_hash(ip);
-        return new InetSocketAddress(hostsname.get(hash%hostsname.size()),ports.get(hash%ports.size()));
+        long hash = EncryptUtil.ip_hash(ip);
+        return new InetSocketAddress(hostsname.get((int)hash%hostsname.size()),ports.get((int)hash%ports.size()));
     }
 }

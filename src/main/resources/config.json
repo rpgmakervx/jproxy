@@ -1,5 +1,7 @@
 {
   "listen":9524,
+  "localhost":"172.16.235.1",
+  "rule":"",
   "proxy_pass":[
     {
       "host":"localhost",

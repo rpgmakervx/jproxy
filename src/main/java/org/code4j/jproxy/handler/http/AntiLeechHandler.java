@@ -12,11 +12,13 @@ import io.netty.handler.codec.http.*;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.code4j.jproxy.client.ProxyClient;
+import org.code4j.jproxy.constans.Const;
 import org.code4j.jproxy.server.IPSelector;
 import org.code4j.jproxy.util.WebUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -27,7 +29,7 @@ import java.util.regex.Pattern;
  * 上午9:18
  */
 
-public class ImageHandler extends ChannelInboundHandlerAdapter{
+public class AntiLeechHandler extends ChannelInboundHandlerAdapter{
 
     private InetSocketAddress address;
     private ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -73,6 +75,33 @@ public class ImageHandler extends ChannelInboundHandlerAdapter{
         ctx.close();
     }
 
+    private void response(ChannelHandlerContext ctx,byte[] contents,HttpResponseStatus status) throws UnsupportedEncodingException {
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(contents, 0, contents.length);
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                status,byteBuf);
+        ctx.channel().writeAndFlush(response);
+        ctx.close();
+    }
+
+    /**
+     * 根据请球头的referer校验是否是盗链者
+     * @param headers
+     * @return
+     * @throws Exception
+     */
+    public boolean antiLeechCheckUp(HttpHeaders headers) throws Exception {
+        String referername = headers.get(HttpHeaderNames.REFERER);
+        if (referername ==null){
+            return false;
+        }
+        referername = new URL(referername).getHost().toString();
+        System.out.println("refer --> "+referername+"  localhost --> "+Const.PROXY_HOST);
+        if (!referername.equals(Const.PROXY_HOST)){
+            return false;
+        }
+        return true;
+    }
+
     class Task implements Runnable{
 
         Object msg;
@@ -91,8 +120,16 @@ public class ImageHandler extends ChannelInboundHandlerAdapter{
                     String context = "";
                     byte[] bytes = null;
                     CloseableHttpResponse response = null;
+                    HttpHeaders headers = request.headers();
+                    headers.get(HttpHeaderNames.REFERER);
+                    //String accept = headers.get(HttpHeaderNames.ACCEPT);
                     //读取图片
                     if (pattern.matcher(request.uri()).matches()){
+                        //防盗链
+                        if (!antiLeechCheckUp(headers)){
+                            response(ctx, "access deny!".getBytes(), HttpResponseStatus.FORBIDDEN);
+                            return;
+                        }
                         fetchInetAddress();
                         ProxyClient client = new ProxyClient(address,WebUtil.ROOT.equals(request.uri())?"":request.uri());
                         //在这里强转类型，如果使用了聚合器，就会被阻塞
